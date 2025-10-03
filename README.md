@@ -1,89 +1,53 @@
-XITEI E-Commerce Website
-Welcome to Xitei, a full-featured e-commerce platform built with Django and React. This project enables efficient product management, seamless user shopping, robust authentication, and smooth payment integration.
+<h1 align="center">🛍️ XITEI – E-Commerce Platform</h1>
+<p align="center"><b>A full-featured E-Commerce platform built with Django & React</b></p>
 
-Features
-Product management for administrators
+<p align="center">
+  <img src="https://img.shields.io/badge/Frontend-React-blue?logo=react" />
+  <img src="https://img.shields.io/badge/Backend-Django-green?logo=django" />
+  <img src="https://img.shields.io/badge/API-Stripe-purple?logo=stripe" />
+  <img src="https://img.shields.io/badge/Auth-JWT-orange?logo=jsonwebtokens" />
+  <img src="https://img.shields.io/badge/License-MIT-yellow?logo=open-source-initiative" />
+</p>
 
-User product browsing, detail views, and search
+---
 
-Shopping cart with add, update, and remove options
+## 🚀 Features
 
-Secure JWT authentication system
+- ✅ **Product Management** – Full admin panel for adding, updating, and deleting products  
+- ✅ **Product Browsing** – Search, filter, and view detailed product pages  
+- ✅ **Shopping Cart** – Add, update, or remove items seamlessly  
+- ✅ **Authentication** – Secure JWT-based login & registration  
+- ✅ **Payments** – Stripe integration for fast and safe transactions  
+- ✅ **Media Support** – Product images and media served from backend  
+- ✅ **Modern UI** – Responsive React frontend for all devices  
 
-Stripe-powered payments
+---
 
-Image/media upload and display from backend
+## 🛠️ Tech Stack
 
-Responsive, modern frontend UI
+| Layer        | Technology |
+|--------------|------------|
+| **Frontend** | React, Axios, Context API |
+| **Backend**  | Django, Django REST Framework |
+| **Database** | SQLite (default, switchable) |
+| **Auth**     | JWT, Django Sessions |
+| **Payments** | Stripe API |
 
-Tech Stack
-Frontend: React, Axios, Context API
+---
 
-Backend: Django, Django REST Framework
+## 📂 Project Structure
 
-Database: SQLite (default), easily switchable
-
-Payment: Stripe API
-
-Authentication: JWT, Django Sessions
-
-Backend Setup
-Required files:
-
-requirements.txt (Python dependencies)
-
-manage.py
-
-Django project & apps: xitei/, products/, users/
-
-.env (secrets, keys, DB config, Stripe keys)
-
-settings.py with MEDIA_URL and MEDIA_ROOT configured
-
-Frontend Setup
-Required files:
-
-package.json (frontend dependencies)
-
-src/ (React source code)
-
-public/ (static/public assets)
-
-.env (API URLs, Stripe public key)
-
-Project Structure
-text
+```text
 xitei/
-  ├── backend/
-  │     ├── manage.py
-  │     ├── xitei/
-  │     ├── products/
-  │     └── users/
-  └── frontend/
-        ├── src/
-        ├── public/
-        └── package.json
-API Endpoints
-Feature	Endpoint	Description
-List Products	/api/products/	Retrieve product list
-Cart Operations	/api/cart/	Add/remove/view cart items
-User Auth	/api/auth/	JWT registration/login
-Stripe Payment	/api/payment/	Create payment session
-Usage
-Use /admin/ for admin product management
+├── backend/
+│   ├── manage.py
+│   ├── xitei/        # Django project
+│   ├── products/     # Product app
+│   └── users/        # User app
+└── frontend/
+    ├── src/          # React source
+    ├── public/       # Static assets
+    └── package.json
 
-Browse, search and view products as users
 
-Add items to cart, update quantities, proceed to checkout
-
-Complete purchases securely through Stripe integration
-
-Carts are linked to user authentication
-
-Contributing
-Pull requests are welcome. Please report bugs or request features using the issue tracker.
-
-License
-MIT License
-
-Authors: Anurodh Prasai & Shailesh Acharya
+Authors -> Anurodh Prasai & Shailesh Acharya
