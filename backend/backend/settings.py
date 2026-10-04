@@ -1,4 +1,5 @@
 import os
+import dj_database_url
 from pathlib import Path
 from dotenv import load_dotenv  # For loading .env
 
@@ -12,9 +13,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'your-default-secret-key')  # Use .env for this
 
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['*']  # For development; restrict in production
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -35,6 +36,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Whitenoise for static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',  # CORS middleware
     'django.middleware.common.CommonMiddleware',
@@ -68,12 +70,18 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend.wsgi.application'
 ASGI_APPLICATION = 'backend.asgi.application'  # For Channels
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',  # Or your DB (e.g., PostgreSQL)
-        'NAME': BASE_DIR / 'db.sqlite3',
+DATABASE_URL = os.getenv('DATABASE_URL')
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -88,6 +96,8 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICSFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -110,7 +120,14 @@ SIMPLE_JWT = {
 }
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = True  # For development; specify origins in production, e.g., CORS_ALLOWED_ORIGINS = ['http://localhost:3000']
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOWED_ORIGINS = [
+        FRONTEND_URL,
+        'http://localhost:5173',
+    ]
 CORS_ALLOW_CREDENTIALS = True
 
 # Email SMTP settings (for OTP)
@@ -136,27 +153,29 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.getenv('GOOGLE_CLIENT_ID')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['email', 'profile']  # Permissions to request from Google
 
-LOGIN_REDIRECT_URL = 'http://localhost:5173/oauth-success'  # Or your React home/dashboard route
-SOCIAL_AUTH_LOGIN_REDIRECT_URL = 'http://localhost:5173/oauth-success'  # Specific to social-auth
-SOCIAL_AUTH_LOGIN_ERROR_URL = 'http://localhost:5173/login'
+_FRONTEND = os.getenv('FRONTEND_URL', 'http://localhost:5173')
+LOGIN_REDIRECT_URL = f'{_FRONTEND}/oauth-success'
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = f'{_FRONTEND}/oauth-success'
+SOCIAL_AUTH_LOGIN_ERROR_URL = f'{_FRONTEND}/login'
 
-# Redis Cache (from previous setup)
+# Redis Cache
+REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://localhost:6379/0',
+        'LOCATION': REDIS_URL,
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
     }
 }
 
-# Channels (from previous)
+# Channels
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('localhost', 6379)],
+            'hosts': [REDIS_URL],
         },
     },
 }
