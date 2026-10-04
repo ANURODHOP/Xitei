@@ -42,9 +42,9 @@ export const CartProvider = ({ children }) => {
       });
       console.log(res.data);
       setCart(res.data);
-      return true;
+      return { success: true };
     } catch (err) {
-      console.log(err);
+      return { success: false, error: err.response?.data?.error || "Failed to add to cart" };
     }
   };
 
@@ -63,10 +63,9 @@ export const CartProvider = ({ children }) => {
         withCredentials: true,
       });
       setCart(res.data);
-      console.log(cart);
+      return { success: true };
     } catch (err) {
-      // Handle error
-      console.log(err);
+      return { success: false, error: err.response?.data?.error || "Failed to update quantity" };
     }
   };
 
@@ -91,6 +90,10 @@ export const CartProvider = ({ children }) => {
     return item ? item.quantity : 0;
   };
 
+  const getCartItemByProductId = (productId) => {
+    return cart.items?.find((i) => i.product.id === productId);
+  };
+
   const getTotalItems = () => (cart.items ?? []).reduce((sum, item) => sum + item.quantity, 0);
 
   const getTotalPrice = () => {
@@ -109,6 +112,7 @@ export const CartProvider = ({ children }) => {
         updateQuantity,
         removeItem,
         getItemQuantity,
+        getCartItemByProductId,
         getTotalItems,
         getTotalPrice,
       }}

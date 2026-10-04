@@ -44,15 +44,36 @@ class ConfirmPaymentView(APIView):
             intent = stripe.PaymentIntent.retrieve(payment_intent_id)
 
             if intent.status == 'succeeded':
-                cart = Cart.objects.filter(user=request.user).first()
+                from django.db import transaction
+                from products.models import Product
 
-                product_list = "\n".join([f"{item.product.name} x{item.quantity}" for item in cart.items.all()])
-                cart.items.all().delete()  # Empty cart
+                cart = Cart.objects.filter(user=request.user).first()
+                if not cart:
+                    return Response({'error': 'Cart not found'}, status=400)
+
+                product_list_str = ""
+                
+                try:
+                    with transaction.atomic():
+                        cart_items = list(cart.items.all())
+                        for item in cart_items:
+                            # select_for_update() locks the row until transaction completes
+                            product = Product.objects.select_for_update().get(id=item.product.id)
+                            if product.stocks < item.quantity:
+                                raise ValueError(f"Insufficient stock for {product.name}. Only {product.stocks} units are available.")
+                            
+                            product.stocks -= item.quantity
+                            product.save()
+                            product_list_str += f"{product.name} x{item.quantity}\n"
+                        
+                        cart.items.all().delete()  # Empty cart
+                except ValueError as ve:
+                    return Response({'error': str(ve)}, status=400)
 
                 # Send email confirmation
                 send_mail(
                     'Order Confirmation - Xitei',
-                    f'Thank you for your purchase! Your delivery is being processed.\n\nOrder Details:\n{product_list}',
+                    f'Thank you for your purchase! Your delivery is being processed.\n\nOrder Details:\n{product_list_str}',
                     settings.EMAIL_HOST_USER,
                     [request.user.email],
                     fail_silently=False,

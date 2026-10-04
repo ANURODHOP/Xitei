@@ -40,7 +40,7 @@ class AddToCartView(APIView):
         item, created = CartItem.objects.get_or_create(cart=cart, product=product)
         new_quantity = item.quantity + quantity if not created else quantity
         if new_quantity > product.stocks:
-            return Response({"error": "Out of stocks"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": f"Only {product.stocks} units are available."}, status=status.HTTP_400_BAD_REQUEST)
         item.quantity = new_quantity
         item.save()
 
@@ -55,7 +55,9 @@ class UpdateCartItemView(APIView):
         except CartItem.DoesNotExist:
             return Response({"error": "Item not found"}, status=status.HTTP_404_NOT_FOUND)
         quantity = int(request.data.get('quantity', item.quantity))
-        if quantity < 1 or quantity > item.product.stocks:
+        if quantity > item.product.stocks:
+            return Response({"error": f"Only {item.product.stocks} units are available."}, status=status.HTTP_400_BAD_REQUEST)
+        if quantity < 1:
             return Response({"error": "Invalid quantity"}, status=status.HTTP_400_BAD_REQUEST)
         item.quantity = quantity
         item.save()
