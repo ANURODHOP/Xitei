@@ -26,7 +26,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',  # For APIs
     'corsheaders',     # For CORS
-    'channels',        # Assuming your WebSocket setup
     'social_django',   # For Google OAuth
     'auth_app',        # Your app
     'products',    # Your products app
@@ -158,27 +157,39 @@ LOGIN_REDIRECT_URL = f'{_FRONTEND}/oauth-success'
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = f'{_FRONTEND}/oauth-success'
 SOCIAL_AUTH_LOGIN_ERROR_URL = f'{_FRONTEND}/login'
 
-# Redis Cache
-REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': REDIS_URL,
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+# Redis Cache — optional. Falls back to local memory cache if REDIS_URL is not set.
+REDIS_URL = os.getenv('REDIS_URL')
+if REDIS_URL:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': REDIS_URL,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            }
         }
     }
-}
-
-# Channels
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [REDIS_URL],
+    # Django Channels with Redis
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                'hosts': [REDIS_URL],
+            },
         },
-    },
-}
+    }
+else:
+    # No Redis — use simple in-memory fallbacks (fine for serverless / single-process)
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        },
+    }
 
 
 SOCIAL_AUTH_PIPELINE = (

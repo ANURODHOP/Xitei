@@ -5,10 +5,6 @@ django-cors-headers==4.7.0
 social-auth-app-django==5.5.1
 social-auth-core==4.7.0
 channels==4.3.1
-channels_redis==4.2.1
-daphne==4.2.1
-django-redis==6.0.0
-redis==6.2.0
 stripe==12.5.1
 python-dotenv==1.0.1
 Pillow==11.1.0
