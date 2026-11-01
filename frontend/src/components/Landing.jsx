@@ -2,11 +2,11 @@ import React, { Suspense, useState, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, OrbitControls, ContactShadows, Environment } from '@react-three/drei';
 import { Link } from 'react-router-dom';
-import cartoonModelUrl from '../assets/cartoon.glb?url';
+import fastFoodModelUrl from '../assets/fast-foods.glb?url';
 
 /* ── 3D Model with gentle auto-rotate that pauses on grab ── */
 function CartoonModel() {
-  const { scene } = useGLTF(cartoonModelUrl);
+  const { scene } = useGLTF(fastFoodModelUrl);
   const ref = useRef();
   const [dragging, setDragging] = useState(false);
 
@@ -20,8 +20,8 @@ function CartoonModel() {
     <primitive
       ref={ref}
       object={scene}
-      scale={2.2}
-      position={[0, -0.6, 0]}
+      scale={1.4}
+      position={[0, -0.8, 0]}
       onPointerDown={() => setDragging(true)}
       onPointerUp={() => setDragging(false)}
     />
