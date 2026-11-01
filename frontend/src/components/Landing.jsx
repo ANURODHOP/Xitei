@@ -1,184 +1,219 @@
-import React, { Suspense } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { TextureLoader, Vector3 } from 'three';
-import { OrbitControls, useGLTF, Environment } from '@react-three/drei';
-import {Link} from 'react-router-dom'; 
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
-import bg1 from '../assets/bg-junkFoods.png'; // Ensure the path is correct and the image exists
-import fastFoodModelUrl from '../assets/fast-foods.glb?url'; // Import as URL for correct bundling in Vite
+const features = [
+  {
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8l1 12a2 2 0 002 2h8a2 2 0 002-2l1-12M10 12v4m4-4v4" />
+      </svg>
+    ),
+    title: 'Curated Selection',
+    desc: 'Hand-picked products across dozens of categories. Quality checked before it reaches your door.',
+  },
+  {
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+      </svg>
+    ),
+    title: 'Secure Payments',
+    desc: 'Every transaction is encrypted end-to-end. Pay with card through our Stripe-powered checkout.',
+  },
+  {
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+      </svg>
+    ),
+    title: 'Real-Time Stock',
+    desc: 'Live inventory tracking. What you see is always what\'s actually available — no surprises at checkout.',
+  },
+];
 
-// Enhanced Spinning Cylinder with dynamic lighting and subtle hover effect
-function SpinningCylinder({ position }) {
-  const texture = new TextureLoader().load(bg1);
-  const ref = React.useRef();
-  const [hovered, setHover] = React.useState(false);
+const categories = [
+  { name: 'Electronics', emoji: '📱' },
+  { name: 'Fashion', emoji: '👗' },
+  { name: 'Home & Kitchen', emoji: '🏠' },
+  { name: 'Sports', emoji: '⚽' },
+  { name: 'Books', emoji: '📚' },
+  { name: 'Food & Beverages', emoji: '🥗' },
+];
 
-  useFrame(() => {
-    ref.current.rotation.y += hovered ? 0.02 : 0.005; // Faster spin on hover
-  });
-
-  return (
-    <mesh 
-      ref={ref} 
-      position={position} 
-      onPointerOver={() => setHover(true)} 
-      onPointerOut={() => setHover(false)}
-    >
-      <cylinderGeometry args={[6, 6, 12, 128, 1, true, 0, Math.PI * 2]} /> {/* Larger size, higher segments for ultra-smooth */}
-      <meshPhysicalMaterial 
-        map={texture} 
-        side={2} 
-        emissive="#ff9900" 
-        emissiveIntensity={0.6} 
-        roughness={0.3} 
-        metalness={0.5} 
-        clearcoat={1} 
-        clearcoatRoughness={0.1}
-      /> {/* Premium physical material with clearcoat for glossy look */}
-    </mesh>
-  );
-}
-
-// Enhanced Fast Food Model with floating animation and interactive scaling
-function FastFoodModel({ position }) {
-  const { scene } = useGLTF(fastFoodModelUrl);
-  const ref = React.useRef();
-  const [hovered, setHover] = React.useState(false);
-
-  useFrame((state) => {
-    ref.current.rotation.z += (state.pointer.x ) * 0.002; // Rotate based on mouse X position
-    ref.current.rotation.x = -1; // Rotate based on mouse X position
-    
-  })
-
+export default function Landing() {
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <primitive 
-      ref={ref} 
-      object={scene} 
-      position={position} 
-      onPointerOver={() => setHover(true)} 
-      onPointerOut={() => setHover(false)}
-    />
-  );
-}
+    <div className="min-h-screen bg-white text-gray-900 font-sans">
 
-// Main Landing Component with premium design: sleek gradients, animations, and responsive layout
-function Landing() {
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white font-sans antialiased text-gray-800">
-      {/* Premium Navigation with subtle shadow and smooth transitions */}
-      <nav className="bg-indigo-800 text-white p-6 flex justify-between items-center shadow-lg sticky top-0 z-20">
-        <h1 className="text-3xl font-extrabold tracking-tight">Xitei</h1>
-        <div className="space-x-4">
-          <button className="text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition duration-300">Features</button>
-          <button className="text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition duration-300">About</button>
-          <Link to='/register' className="bg-white text-indigo-800 px-6 py-2 rounded-md font-semibold hover:bg-gray-100 transition duration-300 cursor-pointer">
-            Get Started
-          </Link>
-        </div>
-      </nav>
+      {/* ─── Navigation ─── */}
+      <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <span className="text-2xl font-bold tracking-tight text-gray-900">Xitei</span>
 
-      {/* Hero Section: Eye-catching with 3D cylinder, overlay text, and parallax feel */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-blue-500 opacity-80 z-0" />
-        <div className="relative z-10 text-center px-8 max-w-4xl">
-          <h2 className="text-6xl md:text-7xl font-extrabold text-white mb-6 leading-tight animate-fade-in">
-            Revolutionize Your Deliveries with Xitei
-          </h2>
-          <p className="text-2xl text-white mb-10 max-w-2xl mx-auto animate-fade-in delay-200">
-            Fast, reliable, and premium delivery service for groceries, essentials, and more. Experience speed like never before.
-          </p>
-          <button className="bg-white text-indigo-800 px-8 py-4 rounded-full font-bold text-lg hover:shadow-xl transition duration-500 transform hover:scale-105">
-            Start Delivering Today
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
+            <a href="#features" className="hover:text-gray-900 transition-colors">Features</a>
+            <a href="#categories" className="hover:text-gray-900 transition-colors">Categories</a>
+            <Link
+              to="/login"
+              className="hover:text-gray-900 transition-colors"
+            >
+              Sign In
+            </Link>
+            <Link
+              to="/register"
+              className="bg-gray-900 text-white px-5 py-2 rounded-md text-sm font-medium hover:bg-black transition-colors"
+            >
+              Get Started
+            </Link>
+          </nav>
+
+          {/* Mobile hamburger */}
+          <button
+            className="md:hidden p-2 text-gray-600 hover:text-gray-900"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? (
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            ) : (
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+            )}
           </button>
         </div>
-        <div className="absolute inset-0 z-0">
-          <Canvas camera={{ position: [0, 0, 20], fov: 40 }}>
-            <Suspense fallback={null}>
-              <ambientLight intensity={2.0} />
-              <directionalLight position={[15, 20, 15]} intensity={3.0} castShadow color="#ffffff" />
-              <pointLight position={[-15, -10, -15]} intensity={2.5} color="#ffcc00" />
-              <SpinningCylinder position={new Vector3(0, 0, 0)} />
-              <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.5} />
-              <Environment preset="sunset" background /> {/* Premium HDR environment for realistic lighting */}
-              <mesh receiveShadow position={[0, -8, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-                <planeGeometry args={[100, 100]} />
-                <shadowMaterial opacity={0.4} />
-              </mesh>
-            </Suspense>
-          </Canvas>
-        </div>
-      </section>
 
-      {/* Features Section: Clean cards with subtle animations */}
-      <section className="py-24 bg-white px-8 md:px-16">
-        <h2 className="text-5xl font-bold text-center mb-16">Why Choose Xitei?</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          <div className="p-8 bg-indigo-50 rounded-xl shadow-md hover:shadow-2xl transition duration-500 transform hover:-translate-y-2">
-            <h3 className="text-2xl font-semibold mb-4">Lightning Fast Delivery</h3>
-            <p className="text-gray-600">Get your orders in minutes with our optimized routes and real-time tracking.</p>
+        {/* Mobile menu */}
+        {menuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-100 px-4 pt-3 pb-4 space-y-2 text-sm font-medium text-gray-700">
+            <a href="#features" className="block py-2 hover:text-gray-900" onClick={() => setMenuOpen(false)}>Features</a>
+            <a href="#categories" className="block py-2 hover:text-gray-900" onClick={() => setMenuOpen(false)}>Categories</a>
+            <Link to="/login" className="block py-2 hover:text-gray-900" onClick={() => setMenuOpen(false)}>Sign In</Link>
+            <Link
+              to="/register"
+              className="block mt-2 text-center bg-gray-900 text-white px-5 py-2.5 rounded-md font-medium hover:bg-black transition-colors"
+              onClick={() => setMenuOpen(false)}
+            >
+              Get Started
+            </Link>
           </div>
-          <div className="p-8 bg-indigo-50 rounded-xl shadow-md hover:shadow-2xl transition duration-500 transform hover:-translate-y-2">
-            <h3 className="text-2xl font-semibold mb-4">Eco-Friendly Options</h3>
-            <p className="text-gray-600">Choose sustainable packaging and electric vehicles for a greener planet.</p>
-          </div>
-          <div className="p-8 bg-indigo-50 rounded-xl shadow-md hover:shadow-2xl transition duration-500 transform hover:-translate-y-2">
-            <h3 className="text-2xl font-semibold mb-4">24/7 Support</h3>
-            <p className="text-gray-600">Our team is always here to help with any queries or issues.</p>
-          </div>
-        </div>
-      </section>
+        )}
+      </header>
 
-      {/* Featured Fast Food Section: Integrated 3D model with premium presentation */}
-      <section className="py-24 bg-gradient-to-r from-blue-100 to-indigo-100 text-center px-8 md:px-16">
-        <h2 className="text-5xl font-bold mb-8">Indulge in Premium Fast Food Deliveries</h2>
-        <p className="text-2xl max-w-3xl mx-auto mb-12 text-gray-600">
-          Crave-worthy meals delivered fresh and hot. Explore our curated selection of fast food favorites.
+      {/* ─── Hero ─── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 text-center">
+        <span className="inline-block mb-4 px-3 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full tracking-wider uppercase">
+          Now live — Shop with confidence
+        </span>
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 leading-tight max-w-3xl mx-auto">
+          Everything you need,<br className="hidden sm:block" /> delivered to you.
+        </h1>
+        <p className="mt-6 text-lg text-gray-500 max-w-xl mx-auto leading-relaxed">
+          Xitei is a modern shopping platform. Browse thousands of products, track stock in real time, and check out securely in seconds.
         </p>
-        <div className="w-full h-[600px] mx-auto rounded-2xl overflow-hidden shadow-2xl">
-          <Canvas camera={{ position: [0, 0, 500], fov: 100, rotation:[0,0,0] }}>
-            <Suspense fallback={null}>
-              <ambientLight intensity={1.0} />
-              <FastFoodModel position={[0, 0, 0]}/>
-              <OrbitControls enableZoom={false} enablePan={true}/>
-            </Suspense>  
-          </Canvas>  
+        <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <Link
+            to="/register"
+            className="bg-gray-900 text-white px-8 py-3.5 rounded-md font-semibold text-base hover:bg-black transition-colors w-full sm:w-auto"
+          >
+            Create your account
+          </Link>
+          <Link
+            to="/login"
+            className="border border-gray-300 text-gray-700 px-8 py-3.5 rounded-md font-semibold text-base hover:border-gray-400 hover:bg-gray-50 transition-colors w-full sm:w-auto"
+          >
+            Sign in
+          </Link>
+        </div>
+
+        {/* Trust bar */}
+        <div className="mt-12 flex flex-wrap justify-center gap-6 text-sm text-gray-400 font-medium">
+          <span className="flex items-center gap-1.5">
+            <svg className="h-4 w-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 00-1.414 0L8 12.586 4.707 9.293a1 1 0 00-1.414 1.414l4 4a1 1 0 001.414 0l8-8a1 1 0 000-1.414z" clipRule="evenodd" /></svg>
+            No hidden fees
+          </span>
+          <span className="flex items-center gap-1.5">
+            <svg className="h-4 w-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 00-1.414 0L8 12.586 4.707 9.293a1 1 0 00-1.414 1.414l4 4a1 1 0 001.414 0l8-8a1 1 0 000-1.414z" clipRule="evenodd" /></svg>
+            Secure checkout
+          </span>
+          <span className="flex items-center gap-1.5">
+            <svg className="h-4 w-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 00-1.414 0L8 12.586 4.707 9.293a1 1 0 00-1.414 1.414l4 4a1 1 0 001.414 0l8-8a1 1 0 000-1.414z" clipRule="evenodd" /></svg>
+            Real stock updates
+          </span>
         </div>
       </section>
 
-      {/* CTA Section: Bold call to action with gradient */}
-      <section className="py-24 bg-indigo-800 text-white text-center">
-        <h2 className="text-5xl font-bold mb-8">Ready to Experience Xitei?</h2>
-        <p className="text-2xl max-w-2xl mx-auto mb-12">Join thousands of satisfied customers and elevate your delivery game.</p>
-        <Link to='/register' className="bg-white text-indigo-800 px-10 py-4 rounded-full font-bold text-xl hover:bg-gray-100 transition duration-300 cursor-pointer">
-          Sign Up Now
-        </Link>
+      {/* ─── Divider ─── */}
+      <div className="border-t border-gray-100" />
+
+      {/* ─── Features ─── */}
+      <section id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="text-center mb-14">
+          <h2 className="text-3xl font-bold text-gray-900">Why Xitei?</h2>
+          <p className="mt-3 text-gray-500 max-w-lg mx-auto">Built around the shopping experience that actually matters to you.</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {features.map((f) => (
+            <div key={f.title} className="p-7 border border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-sm transition-all">
+              <div className="text-gray-700 mb-4">{f.icon}</div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">{f.title}</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">{f.desc}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
-      {/* Footer: Simple and elegant */}
-      <footer className="bg-indigo-900 text-white py-8 text-center">
-        <p>&copy; 2025 Xitei. All rights reserved.</p>
-        <div className="mt-4 space-x-4">
-          <a href="#" className="hover:underline">Privacy Policy</a>
-          <a href="#" className="hover:underline">Terms of Service</a>
-          <a href="#" className="hover:underline">Contact Us</a>
+      {/* ─── Categories ─── */}
+      <section id="categories" className="bg-gray-50 border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900">Shop by Category</h2>
+            <p className="mt-3 text-gray-500">Find exactly what you're looking for.</p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            {categories.map((cat) => (
+              <Link
+                to="/register"
+                key={cat.name}
+                className="flex flex-col items-center justify-center gap-3 p-5 bg-white border border-gray-200 rounded-xl hover:border-gray-400 hover:shadow-sm transition-all group cursor-pointer"
+              >
+                <span className="text-3xl">{cat.emoji}</span>
+                <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900 text-center leading-tight">{cat.name}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── CTA Banner ─── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="bg-gray-900 rounded-2xl px-8 py-14 text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white">Ready to start shopping?</h2>
+          <p className="mt-4 text-gray-400 max-w-md mx-auto text-base">
+            Create a free account and start browsing thousands of products today.
+          </p>
+          <Link
+            to="/register"
+            className="mt-8 inline-block bg-white text-gray-900 px-8 py-3.5 rounded-md font-semibold text-base hover:bg-gray-100 transition-colors"
+          >
+            Get started for free
+          </Link>
+        </div>
+      </section>
+
+      {/* ─── Footer ─── */}
+      <footer className="border-t border-gray-200 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-400">
+          <span className="font-semibold text-gray-700">Xitei</span>
+          <span>&copy; {new Date().getFullYear()} Xitei. All rights reserved.</span>
+          <div className="flex gap-5">
+            <a href="#" className="hover:text-gray-600 transition-colors">Privacy</a>
+            <a href="#" className="hover:text-gray-600 transition-colors">Terms</a>
+            <a href="#" className="hover:text-gray-600 transition-colors">Contact</a>
+          </div>
         </div>
       </footer>
+
     </div>
   );
 }
-
-export default Landing;
-
-// Add global animations via CSS (can be added in index.css or via style tag)
-const style = document.createElement('style');
-style.innerHTML = `
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in { animation: fade-in 1s ease-out; }
-.delay-200 { animation-delay: 0.2s; }
-`;
-document.head.appendChild(style);
